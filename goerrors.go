@@ -13,16 +13,12 @@ func NilOrPanic(e error) {
 
 // NilOrPanic1 panics with e if e is not nil. Otherwise, it returns t.
 func NilOrPanic1[T any](t T, e error) T {
-	if e != nil {
-		panic(e)
-	}
+	NilOrPanic(e)
 	return t
 }
 
 // NilOrPanic2 panics with e if e is not nil. Otherwise, it returns (t1, t2).
 func NilOrPanic2[T1, T2 any](t1 T1, t2 T2, e error) (T1, T2) {
-	if e != nil {
-		panic(e)
-	}
+	NilOrPanic(e)
 	return t1, t2
 }
