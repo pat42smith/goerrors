@@ -14,63 +14,63 @@ import (
 	"github.com/pat42smith/gotest"
 )
 
-func TestNilOrPanic(t *testing.T) {
-	NilOrPanic(nil)
+func TestOrPanic(t *testing.T) {
+	OrPanic(nil)
 
 	e := gotest.MustPanic(t, func() {
-		NilOrPanic(fmt.Errorf("oops!"))
+		OrPanic(fmt.Errorf("oops!"))
 	})
 	gotest.Expect(t, "oops!", e.(error).Error())
 }
 
-func TestNilOrPanic1(t *testing.T) {
+func TestOrPanic1(t *testing.T) {
 	var x byte = 99
-	gotest.Expect(t, x, NilOrPanic1(x, nil))
+	gotest.Expect(t, x, OrPanic1(x, nil))
 
 	e := gotest.MustPanic(t, func() {
-		NilOrPanic1(x, fmt.Errorf("broken"))
+		OrPanic1(x, fmt.Errorf("broken"))
 	})
 	gotest.Expect(t, "broken", e.(error).Error())
 
 	foo := func() (byte, error) {
 		return x, nil
 	}
-	gotest.Expect(t, x, NilOrPanic1(foo()))
+	gotest.Expect(t, x, OrPanic1(foo()))
 }
 
-func TestNilOrPanic2(t *testing.T) {
+func TestOrPanic2(t *testing.T) {
 	x := "seventeen"
 	y := 3.7
-	u, v := NilOrPanic2(x, y, nil)
+	u, v := OrPanic2(x, y, nil)
 	gotest.Expect(t, x, u)
 	gotest.Expect(t, y, v)
 
 	e := gotest.MustPanic(t, func() {
-		NilOrPanic2(x, y, fmt.Errorf("sabotaged"))
+		OrPanic2(x, y, fmt.Errorf("sabotaged"))
 	})
 	gotest.Expect(t, "sabotaged", e.(error).Error())
 
 	foo := func() (string, float64, error) {
 		return x, y, nil
 	}
-	u, v = NilOrPanic2(foo())
+	u, v = OrPanic2(foo())
 	gotest.Expect(t, x, u)
 	gotest.Expect(t, y, v)
 }
 
-func TestNilOrExit(t *testing.T) {
-	NilOrExit(nil)
+func TestOrExit(t *testing.T) {
+	OrExit(nil)
 }
 
-func TestNilOrExit1(t *testing.T) {
+func TestOrExit1(t *testing.T) {
 	var x uint16 = 331
-	gotest.Expect(t, x, NilOrExit1(x, nil))
+	gotest.Expect(t, x, OrExit1(x, nil))
 }
 
-func TestNilOrExit2(t *testing.T) {
+func TestOrExit2(t *testing.T) {
 	x := true
 	y := "never"
-	u, v := NilOrPanic2(x, y, nil)
+	u, v := OrPanic2(x, y, nil)
 	gotest.Expect(t, x, u)
 	gotest.Expect(t, y, v)
 }
@@ -78,7 +78,7 @@ func TestNilOrExit2(t *testing.T) {
 func TestExits(t *testing.T) {
 	tmp := t.TempDir()
 	testexits := filepath.Join(tmp, "testexits.exe")
-	gocmd := NilOrPanic1(exec.LookPath("go"))
+	gocmd := OrPanic1(exec.LookPath("go"))
 	cmd := exec.Command(gocmd, "build", "-o", testexits, "testdata/testexits.go")
 	out, e := cmd.CombinedOutput()
 	if e != nil || len(out) > 0 {
@@ -90,11 +90,11 @@ func TestExits(t *testing.T) {
 		arg, result, _ := strings.Cut(s, " ")
 		cmd = exec.Command(testexits, arg)
 		cmd.Stdin = nil
-		out := NilOrPanic1(cmd.StdoutPipe())
-		err := NilOrPanic1(cmd.StderrPipe())
-		NilOrPanic(cmd.Start())
-		gotest.Expect(t, 0, len(NilOrPanic1(io.ReadAll(out))))
-		gotest.Expect(t, result, string(NilOrPanic1(io.ReadAll(err))))
+		out := OrPanic1(cmd.StdoutPipe())
+		err := OrPanic1(cmd.StderrPipe())
+		OrPanic(cmd.Start())
+		gotest.Expect(t, 0, len(OrPanic1(io.ReadAll(out))))
+		gotest.Expect(t, result, string(OrPanic1(io.ReadAll(err))))
 		switch e := cmd.Wait().(type) {
 		case *exec.ExitError:
 			gotest.Expect(t, 1, e.ExitCode())
