@@ -5,7 +5,6 @@ package goerrors
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os/exec"
 	"path/filepath"
@@ -19,7 +18,7 @@ func TestOrPanic(t *testing.T) {
 	OrPanic(nil)
 
 	e := gotest.MustPanic(t, func() {
-		OrPanic(fmt.Errorf("oops!"))
+		OrPanic(errors.New("oops!"))
 	})
 	gotest.Expect(t, "oops!", e.(error).Error())
 }
@@ -29,7 +28,7 @@ func TestOrPanic1(t *testing.T) {
 	gotest.Expect(t, x, OrPanic1(x, nil))
 
 	e := gotest.MustPanic(t, func() {
-		OrPanic1(x, fmt.Errorf("broken"))
+		OrPanic1(x, errors.New("broken"))
 	})
 	gotest.Expect(t, "broken", e.(error).Error())
 
@@ -47,7 +46,7 @@ func TestOrPanic2(t *testing.T) {
 	gotest.Expect(t, y, v)
 
 	e := gotest.MustPanic(t, func() {
-		OrPanic2(x, y, fmt.Errorf("sabotaged"))
+		OrPanic2(x, y, errors.New("sabotaged"))
 	})
 	gotest.Expect(t, "sabotaged", e.(error).Error())
 

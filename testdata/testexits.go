@@ -5,7 +5,7 @@
 package main
 
 import (
-	"fmt"
+	"errors"
 	"os"
 
 	"github.com/pat42smith/goerrors"
@@ -14,10 +14,10 @@ import (
 func main() {
 	switch os.Args[1] {
 	case "0":
-		goerrors.OrExit(fmt.Errorf("zero"))
+		goerrors.OrExit(errors.New("zero"))
 	case "1":
-		goerrors.OrExit1(100, fmt.Errorf("one"))
+		goerrors.OrExit1(100, errors.New("one"))
 	case "2":
-		goerrors.OrExit2(100, 200, fmt.Errorf("two"))
+		goerrors.OrExit2(100, 200, errors.New("two"))
 	}
 }
