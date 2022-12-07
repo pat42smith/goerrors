@@ -78,8 +78,7 @@ func TestOrExit2(t *testing.T) {
 func TestExits(t *testing.T) {
 	tmp := t.TempDir()
 	testexits := filepath.Join(tmp, "testexits.exe")
-	gocmd := OrPanic1(exec.LookPath("go"))
-	cmd := exec.Command(gocmd, "build", "-o", testexits, "testdata/testexits.go")
+	cmd := exec.Command("go", "build", "-o", testexits, "testdata/testexits.go")
 	out, e := cmd.CombinedOutput()
 	if e != nil || len(out) > 0 {
 		t.Log(string(out))
