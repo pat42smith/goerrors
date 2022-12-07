@@ -4,6 +4,7 @@
 package goerrors
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os/exec"
@@ -102,4 +103,108 @@ func TestExits(t *testing.T) {
 			t.Fatal(e)
 		}
 	}
+}
+
+func TestOrError(t *testing.T) {
+	var sr gotest.StubReporter
+	OrError(nil)(&sr)
+	sr.Expect(t, false, false, "", "")
+
+	OrError(errors.New("problem"))(&sr)
+	sr.Expect(t, true, false, "problem\n", "")
+}
+
+func TestOrError1(t *testing.T) {
+	var sr gotest.StubReporter
+	x := OrError1(99.0, nil)(&sr)
+	sr.Expect(t, false, false, "", "")
+	gotest.Expect(t, 99.0, x)
+
+	c := OrError1(rune('日'), errors.New("disaster"))(&sr)
+	sr.Expect(t, true, false, "disaster\n", "")
+	gotest.Expect(t, rune('日'), c)
+
+	var sr1 gotest.StubReporter
+	foo := func() (string, error) {
+		return "doughnuts", errors.New("donuts")
+	}
+	s := OrError1(foo())(&sr1)
+	sr1.Expect(t, true, false, "donuts\n", "")
+	gotest.Expect(t, "doughnuts", s)
+}
+
+func TestOrError2(t *testing.T) {
+	x := "seventeen"
+	y := 3.7
+	var sr gotest.StubReporter
+	u, v := OrError2(x, y, nil)(&sr)
+	sr.Expect(t, false, false, "", "")
+	gotest.Expect(t, x, u)
+	gotest.Expect(t, y, v)
+
+	u, v = OrError2(x, y, errors.New("falling"))(&sr)
+	sr.Expect(t, true, false, "falling\n", "")
+	gotest.Expect(t, x, u)
+	gotest.Expect(t, y, v)
+
+	var sr1 gotest.StubReporter
+	foo := func() (string, float64, error) {
+		return x, y, nil
+	}
+	u, v = OrError2(foo())(&sr1)
+	sr1.Expect(t, false, false, "", "")
+	gotest.Expect(t, x, u)
+	gotest.Expect(t, y, v)
+}
+
+func TestOrFatal(t *testing.T) {
+	var sr gotest.StubReporter
+	OrFatal(nil)(&sr)
+	sr.Expect(t, false, false, "", "")
+
+	OrFatal(errors.New("problem"))(&sr)
+	sr.Expect(t, true, true, "problem\n", "")
+}
+
+func TestOrFatal1(t *testing.T) {
+	var sr gotest.StubReporter
+	x := OrFatal1(99.0, nil)(&sr)
+	sr.Expect(t, false, false, "", "")
+	gotest.Expect(t, 99.0, x)
+
+	c := OrFatal1(rune('日'), errors.New("disaster"))(&sr)
+	sr.Expect(t, true, true, "disaster\n", "")
+	gotest.Expect(t, rune('日'), c)
+
+	var sr1 gotest.StubReporter
+	foo := func() (string, error) {
+		return "doughnuts", errors.New("donuts")
+	}
+	s := OrFatal1(foo())(&sr1)
+	sr1.Expect(t, true, true, "donuts\n", "")
+	gotest.Expect(t, "doughnuts", s)
+}
+
+func TestOrFatal2(t *testing.T) {
+	x := "seventeen"
+	y := 3.7
+	var sr gotest.StubReporter
+	u, v := OrFatal2(x, y, nil)(&sr)
+	sr.Expect(t, false, false, "", "")
+	gotest.Expect(t, x, u)
+	gotest.Expect(t, y, v)
+
+	u, v = OrFatal2(x, y, errors.New("falling"))(&sr)
+	sr.Expect(t, true, true, "falling\n", "")
+	gotest.Expect(t, x, u)
+	gotest.Expect(t, y, v)
+
+	var sr1 gotest.StubReporter
+	foo := func() (string, float64, error) {
+		return x, y, nil
+	}
+	u, v = OrFatal2(foo())(&sr1)
+	sr1.Expect(t, false, false, "", "")
+	gotest.Expect(t, x, u)
+	gotest.Expect(t, y, v)
 }
