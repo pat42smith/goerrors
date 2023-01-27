@@ -1,12 +1,10 @@
-// Copyright 2022 Patrick Smith
+// Copyright 2022-2023 Patrick Smith
 // Use of this source code is subject to the MIT-style license in the LICENSE file.
 
 package goerrors
 
 import (
 	"errors"
-	"io"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -78,28 +76,14 @@ func TestOrExit2(t *testing.T) {
 func TestExits(t *testing.T) {
 	tmp := t.TempDir()
 	testexits := filepath.Join(tmp, "testexits.exe")
-	cmd := exec.Command("go", "build", "-o", testexits, "testdata/testexits.go")
-	out, e := cmd.CombinedOutput()
-	if e != nil || len(out) > 0 {
-		t.Log(string(out))
-		t.Fatal(e)
-	}
+	gotest.Command("go", "build", "-o", testexits, "testdata/testexits.go").Run(t, "")
 
 	for _, s := range []string{"0 zero\n", "1 one\n", "2 two\n"} {
 		arg, result, _ := strings.Cut(s, " ")
-		cmd = exec.Command(testexits, arg)
-		cmd.Stdin = nil
-		out := OrPanic1(cmd.StdoutPipe())
-		err := OrPanic1(cmd.StderrPipe())
-		OrPanic(cmd.Start())
-		gotest.Expect(t, 0, len(OrPanic1(io.ReadAll(out))))
-		gotest.Expect(t, result, string(OrPanic1(io.ReadAll(err))))
-		switch e := cmd.Wait().(type) {
-		case *exec.ExitError:
-			gotest.Expect(t, 1, e.ExitCode())
-		default:
-			t.Fatal(e)
-		}
+		cmd := gotest.Command(testexits, arg)
+		cmd.WantStderr(result)
+		cmd.WantCode(1)
+		cmd.Run(t, "")
 	}
 }
 
